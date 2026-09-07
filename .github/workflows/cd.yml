@@ -29,6 +29,6 @@ jobs:
       - name: Deploy the containers with Docker Compose
         run: |
          docker compose pull
-         docker compose up -d --force-recreateocker compose up -d
+         docker compose up -d --force-recreate
 
 
