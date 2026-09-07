@@ -11,6 +11,7 @@ on:
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: self-hosted
     steps:
       - name: Code Checkout
@@ -24,10 +25,10 @@ jobs:
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
+    
       - name: Deploy the containers with Docker Compose
         run: |
          docker compose pull
-         docker compose up -d
-         
+         docker compose up -d --force-recreateocker compose up -d
+
 
