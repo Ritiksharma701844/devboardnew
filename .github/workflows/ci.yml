@@ -1,88 +1,86 @@
-#goal - I have to Lint , build test the code for frontend & backend then push the images to docker hub
-
-
 name: CI
 
 on:
-    push:
-      branches : [advanced]
+  push:
+    branches: [advanced]
 
 jobs:
 
-   frontend:
-     runs-on: ubuntu-latest
-     steps:
-       - name: Checkout code
-         uses: actions/checkout@v7
+  frontend:
+    runs-on: ubuntu-latest
 
-       - name: Setup node js
-         uses: actions/setup-node@v6
-         with:
-           node-version: '20'
-           cache: 'npm'
-           cache-dependency-path: frontend/package-lock.json
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
 
-       - name: Install npm packages
-         run: npm install
-         working-directory: frontend
+      - name: Setup node js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-       - name: Run Linter
-         run: npm run lint
-         working-directory: frontend
+      - name: Install npm packages
+        run: npm install
+        working-directory: frontend
 
-       - name: Run Tests
-         run: npm run test
-         working-directory: frontend
+      - name: Run Linter
+        run: npm run lint
+        working-directory: frontend
 
-       - name: Docker Setup [login]
-         uses: docker/login-action@v4
-         with:
-            username: ${{ vars.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Run Tests
+        run: npm run test
+        working-directory: frontend
 
-       - name: Docker build and push
-         uses: docker/build-push-action@v7
-         with:
+      - name: Docker Setup [login]
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker build and push
+        uses: docker/build-push-action@v7
+        with:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-frontend:latest
 
-   backend:
 
-     runs-on: ubuntu-latest
-     steps:
-       - name: Checkout code
-         uses: actions/checkout@v7
+  backend:
+    runs-on: ubuntu-latest
 
-       - name: Setup Go
-         uses: actions/setup-go@v6
-         with:
-           go-version: '1.23'
-           go-version-file: 'go.mod'
-           cache-dependency-path: go.sum
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
 
-       - name: RUN Go Formatter
-         run: go fmt
-         working-directory: backend
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
 
-       - name: RUN GO Vet
-         run: go vet
-         working-directory: backend
+      - name: Run Go Formatter
+        run: go fmt ./...
+        working-directory: backend
 
-       - name: Run Tests
-         run: go test
-         working-directory: backend
+      - name: Run Go Vet
+        run: go vet ./...
+        working-directory: backend
 
-       - name: Docker Setup [login]
-         uses: docker/login-action@v4
-         with:
-            username: ${{ vars.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Run Tests
+        run: go test ./...
+        working-directory: backend
 
-       - name: Docker build and push
-         uses: docker/build-push-action@v7
-         with:
+      - name: Docker Setup [login]
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker build and push
+        uses: docker/build-push-action@v7
+        with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true

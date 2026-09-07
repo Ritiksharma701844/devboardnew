@@ -1,5 +1,3 @@
-#goal to deploy image from CI steps once the CI workflow is succesdded
-
 name: CD
 
 on:
@@ -10,25 +8,28 @@ on:
       - advanced
 
 jobs:
+
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: self-hosted
+
     steps:
+
       - name: Code Checkout
         uses: actions/checkout@v7
+        with:
+          ref: advanced
 
       - name: Copy Example Env to main Env
-        run: cp .env.example .env
+        run: cp -f .env.example .env
 
       - name: Docker Setup [login]
         uses: docker/login-action@v4
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-    
+
       - name: Deploy the containers with Docker Compose
         run: |
-         docker compose pull
-         docker compose up -d --force-recreate
-
-
+          docker compose pull
+          docker compose up -d --force-recreate
