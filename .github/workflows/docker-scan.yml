@@ -1,0 +1,32 @@
+#ensure docker file is security test
+
+name: Docker Scan
+
+
+on:
+    workflow_call:
+
+
+jobs:
+     docker-file-linte-and-scan:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                folders: ['backend','frontend']
+        steps:
+            - name : Code Checkout
+              uses: actions/checkout@v7
+
+            - name: Dockerfile lint
+              uses: hadolint/hadolint-action@v3.1.0
+              with:
+                 dockerfile: ${{ matrix.folders}}/Dockerfile
+
+
+
+
+
+
+
+     
