@@ -23,7 +23,26 @@ jobs:
               with:
                  dockerfile: ${{ matrix.folders}}/Dockerfile
 
+            
+            - name: Docker Setup [login]
+              uses: docker/login-action@v4
+              with:
+               username: ${{ vars.DOCKERHUB_USERNAME }}
+               password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+            - name: Docker build ${{matrix.folders}}
+              run: docker build -t ${{ vars.DOCKERHUB_USERNAME}}/devbaord-${{matrix.folders}}/devboard-backend:latest .
+              working-directory: ${{matrix.folders}}
+
+            - name: Run Trivy vulnerability scanner
+              uses: aquasecurity/trivy-action@v0.36.0
+              with:
+                image-ref: ${{ vars.DOCKERHUB_USERNAME }}/devboard-${{matrix.folders}}:latest .
+                format: 'table'
+                exit-code: '1'
+                ignore-unifixed: true
+                vuln-type: 'os,library'
+                severity: 'CRITICAL,HIGH'
 
 
 
