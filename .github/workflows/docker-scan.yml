@@ -1,51 +1,45 @@
-#ensure docker file is security test
+# ensure docker file is security tested
 
 name: Docker Scan
 
-
 on:
-    workflow_call:
-
+  workflow_call:
 
 jobs:
-     docker-file-linte-and-scan:
-        runs-on: ubuntu-latest
-        strategy:
-            fail-fast: false
-            matrix:
-                folders: ['backend','frontend']
-        steps:
-            - name : Code Checkout
-              uses: actions/checkout@v7
+  docker-file-linte-and-scan:
+    runs-on: ubuntu-latest
 
-            - name: Dockerfile lint
-              uses: hadolint/hadolint-action@v3.1.0
-              with:
-                 dockerfile: ${{ matrix.folders}}/Dockerfile
+    strategy:
+      fail-fast: false
+      matrix:
+        folders: ['backend', 'frontend']
 
-            
-            - name: Docker Setup [login]
-              uses: docker/login-action@v4
-              with:
-               username: ${{ vars.DOCKERHUB_USERNAME }}
-               password: ${{ secrets.DOCKERHUB_TOKEN }}
+    steps:
 
-            - name: Docker build ${{matrix.folders}}
-              run: docker build -t ${{ vars.DOCKERHUB_USERNAME}}/devbaord-${{matrix.folders}}/devboard-backend:latest .
-              working-directory: ${{matrix.folders}}
+      - name: Code Checkout
+        uses: actions/checkout@v7
 
-            - name: Run Trivy vulnerability scanner
-              uses: aquasecurity/trivy-action@v0.36.0
-              with:
-                image-ref: ${{ vars.DOCKERHUB_USERNAME }}/devboard-${{matrix.folders}}:latest .
-                format: 'table'
-                exit-code: '1'
-                ignore-unifixed: true
-                vuln-type: 'os,library'
-                severity: 'CRITICAL'
+      - name: Dockerfile lint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ${{ matrix.folders }}/Dockerfile
 
+      - name: Docker Setup [login]
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Docker build ${{ matrix.folders }}
+        run: docker build -t ${{ vars.DOCKERHUB_USERNAME }}/devboard-${{ matrix.folders }}:latest .
+        working-directory: ${{ matrix.folders }}
 
-
-
-     
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ vars.DOCKERHUB_USERNAME }}/devboard-${{ matrix.folders }}:latest
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL'
