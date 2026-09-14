@@ -1,4 +1,4 @@
-# Stage 1 — build the app into static files
+# Stage 1 - build the app into static files
 FROM node:20-alpine AS build
 
 WORKDIR /app
@@ -10,17 +10,15 @@ COPY . .
 RUN npm run build
 
 
-# Stage 2 — serve the static build with Vite preview
+# Stage 2 - serve the static build
 FROM node:20-alpine
 
 WORKDIR /app
 
-RUN npm install -g vite@7 --no-fund --no-audit && \
-  npm cache clean --force
-
+COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
-COPY vite.preview.config.js ./vite.config.js
+COPY vite.preview.config.js ./.vite.config.js
 
 EXPOSE 4173
 
-CMD ["vite", "preview", "--host", "0.0.0.0", "--port", "4173"]
+CMD ["./node_modules/.bin/vite", "preview", "--host", "0.0.0.0", "--port", "4173"]
