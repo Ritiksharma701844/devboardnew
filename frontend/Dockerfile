@@ -15,7 +15,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-RUN npm install -g vite@6 --no-fund --no-audit && \
+RUN npm install -g vite@7 --no-fund --no-audit && \
   npm cache clean --force
 
 COPY --from=build /app/dist ./dist
