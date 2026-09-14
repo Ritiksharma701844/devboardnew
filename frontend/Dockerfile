@@ -1,5 +1,5 @@
-# Stage 1 - build the app into static files
-FROM node:20-alpine AS build
+# Stage 1 - build
+FROM node:24-alpine AS build
 
 WORKDIR /app
 
@@ -10,8 +10,8 @@ COPY . .
 RUN npm run build
 
 
-# Stage 2 - serve the static build
-FROM node:20-alpine
+# Stage 2 - serve
+FROM node:24-alpine
 
 WORKDIR /app
 
